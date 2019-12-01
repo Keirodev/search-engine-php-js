@@ -121,8 +121,8 @@ class Indexer
         $files = json_encode($this->files);
 //        $tokenizeString = $this->getTokenizer()->tokenizeJs();
         $output = sprintf('<?php
-        $index = \'%s\';
-        $files = \'%s\';
+        $index = json_decode(\'%s\');
+        $files = json_decode(\'%s\');
         ',$index, $files);
         return $output;
     }
