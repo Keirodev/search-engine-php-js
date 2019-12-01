@@ -110,6 +110,23 @@ class Indexer
         $this->_tokenizer = $tokenizer;
     }
 
+    /*public function exportToJsonFiles()
+    {
+        file_put_contents('jssearch.index.js', json_encode($this->index));
+    }*/
+
+    public function exportPhp()
+    {
+        $index = json_encode($this->index);
+        $files = json_encode($this->files);
+//        $tokenizeString = $this->getTokenizer()->tokenizeJs();
+        $output = sprintf('<?php
+        $index = \'%s\';
+        $files = \'%s\';
+        ',$index, $files);
+        return $output;
+    }
+
     public function exportJs()
     {
         $index = json_encode($this->index);
