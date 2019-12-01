@@ -1,3 +1,4 @@
 jssearch.index.js
 
-/vendor/
+vendor
+.idea
