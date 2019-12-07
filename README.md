@@ -22,7 +22,11 @@ PHP 5.4 or higher is required to run the index generator.
 Installation is recommended to be done via [composer](https://getcomposer.org/) by adding the following to the `require` section in your `composer.json`:
 
 ```json
-"cebe/js-search": "~0.9"
+{ "require" : 
+  {
+  "cebe/js-search": "~0.9"
+  }
+}
 ```
 
 Alternatively run `composer require "cebe/js-search"`.
@@ -39,7 +43,10 @@ See [example.html](example.html) for an implementation.
 
 Using the command line tool:
 ```
-vendor/bin/jsindex <path-to-your-html-files>
+vendor/bin/generateindex <path-to-your-html-files>
 ```
-
+### js
 This will generate a `jssearch.index.js` file that you have to include in the HTML header.
+
+### php
+This will generate a `search-engine-index.php` in data folder.
