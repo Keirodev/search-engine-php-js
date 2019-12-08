@@ -17,36 +17,36 @@ To see how it looks like, check out the [demo][].
 Installation
 ------------
 
-PHP 5.4 or higher is required to run the index generator.
+PHP 5.6 or higher is required to run the index generator.
 
 Installation is recommended to be done via [composer](https://getcomposer.org/) by adding the following to the `require` section in your `composer.json`:
 
 ```json
 { "require" : 
   {
-  "cebe/js-search": "~0.9"
+  "keiro/php-js-search": "~1.0"
   }
 }
 ```
 
-Alternatively run `composer require "cebe/js-search"`.
+Alternatively run `composer require "keiro/php-js-search"`.
+
+Generate the index
+----
+Using the command line tool:
+```
+vendor/bin/generateindex <path-to-your-html-files>
+```
+
+#### js
+This will generate a `jssearch.index.js` file that you have to include in the HTML header.
+
+#### php
+This will generate a `search-engine-index.php` in data folder.
 
 
 Usage
 -----
 
-TODO.
-
-See [example.html](example.html) for an implementation.
-
-### Generate the index
-
-Using the command line tool:
-```
-vendor/bin/generateindex <path-to-your-html-files>
-```
-### js
-This will generate a `jssearch.index.js` file that you have to include in the HTML header.
-
-### php
-This will generate a `search-engine-index.php` in data folder.
+See [example.html](example.html) for a js implementation.  
+See [example-php.html](example-php.html) for a php implementation.

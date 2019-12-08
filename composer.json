@@ -1,5 +1,5 @@
 {
-  "name": "cebe/js-search",
+  "name": "keiro/php-js-search",
   "description": "A client or server side search engine for use on static pages.",
   "license": "MIT",
   "authors": [
@@ -23,6 +23,6 @@
     }
   },
   "bin": [
-    "bin/jsindex"
+    "bin/generateindex"
   ]
 }
