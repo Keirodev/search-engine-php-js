@@ -123,7 +123,11 @@ $filesJson = <<<JSON
 %s
 JSON;
 
+// remove "Control Characters" to avoid json_decode error
+$indexJson = preg_replace(\'/[[:cntrl:]]/\', \'\', $indexJson);
 $index = json_decode($indexJson);
+
+$filesJson = preg_replace(\'/[[:cntrl:]]/\', \'\', $filesJson);
 $files = json_decode($filesJson);',$index, $files);
         return $output;
     }

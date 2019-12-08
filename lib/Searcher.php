@@ -113,7 +113,8 @@ class Searcher
             return ($aWeight === $bWeight) ? 0 : ($aWeight < $bWeight) ? 1 : -1;
         });
 
-        return $result;
+        // return only the 20 best results
+        return array_slice($result, 0, 20);
     }
 
     public function getResults($query) {

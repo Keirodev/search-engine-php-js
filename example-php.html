@@ -8,14 +8,16 @@
     <script type="text/javascript">
 
       $(document).ready(function () {
-        $('#searchbox').on("keyup", function () {
+        $('#searchbox').keypress(function (event) {
 
+          event.stopPropagation()
+          if ((event.keyCode ? event.keyCode : event.which) === 13) {
 
-          const query = $(this).val()
-          $.getJSON(`phpsearch.php?query=${encodeURIComponent(query)}`)
-            .done(result => {
+            const query = $(this).val()
+            $.getJSON(`phpsearch.php?query=${encodeURIComponent(query)}`)
+              .done(result => {
 
-              if (result.length) {
+                if (result.length) {
                   $('#results').html('')
                   let i = 0
                   result.forEach(function (item) {
@@ -29,11 +31,12 @@
                         "${item.file.title}" <a href="tests/${item.file.url}">${item.file.url}</a>
                         w:${item.weight}</li>`)
                   })
-              } else {
-                $('#results').html('')
-              }
+                } else {
+                  $('#results').html('')
+                }
 
-            });
+              })
+          }
 
         })
       })
