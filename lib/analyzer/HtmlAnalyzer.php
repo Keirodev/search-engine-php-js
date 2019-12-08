@@ -52,6 +52,7 @@ class HtmlAnalyzer implements AnalyzerInterface
      * @param $pattern
      * @param $selectors
      * @param TokenizerInterface $tokenizer
+     * @param $weight
      * @return array
      */
     private function findText($string, $pattern, $selectors, $tokenizer, $weight)
