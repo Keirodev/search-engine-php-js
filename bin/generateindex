@@ -1,9 +1,9 @@
 #!/usr/bin/env php
 <?php
 
-// Send all errors to stderr
 use cebe\jssearch\Indexer;
 
+// Send all errors to stderr
 ini_set('display_errors', 'stderr');
 
 // setup composer autoloading

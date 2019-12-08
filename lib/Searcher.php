@@ -4,7 +4,6 @@
 namespace cebe\jssearch;
 
 use cebe\jssearch\tokenizer\StandardTokenizer;
-require_once('../data/jssearch.index.php');
 
 class Searcher
 {
@@ -14,14 +13,12 @@ class Searcher
 
     /**
      * Searcher constructor.
-     * @param array $words
-     * @param array $index
-     * @param array $files
+     * @param object $index
+     * @param object $files
      */
-    public function __construct(array $words, array $index, array $files)
+    public function __construct($index, $files)
     {
-        $this->words = $words;
-        $this->index = $index;
+        $this->index = (array)$index;
         $this->files = $files;
     }
 
@@ -89,9 +86,9 @@ class Searcher
     private function search($query)
     {
         $tokenizedString = new StandardTokenizer();
-        $words = $tokenizedString->tokenize($query);
+        $this->words = $tokenizedString->tokenize($query);
 
-        if (empty($words)) {
+        if (empty($this->words)) {
             return false;
         }
 
@@ -122,7 +119,8 @@ class Searcher
     public function getResults($query) {
         $result = $this->search($query);
 
-        header('Content-Type: application/json');
+        header('Content-Type: application/json;charset=utf-8');
+        header('Status: 200');
         echo json_encode($result);
     }
 

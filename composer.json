@@ -1,6 +1,6 @@
 {
   "name": "cebe/js-search",
-  "description": "A client side search engine for use on static pages.",
+  "description": "A client or server side search engine for use on static pages.",
   "license": "MIT",
   "authors": [
     {

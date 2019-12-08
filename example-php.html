@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+
+    <script src="http://code.jquery.com/jquery-3.4.1.min.js"></script>
+
+    <script type="text/javascript">
+
+      $(document).ready(function () {
+        $('#searchbox').on("keyup", function () {
+
+
+          const query = $(this).val()
+          $.getJSON(`phpsearch.php?query=${encodeURIComponent(query)}`)
+            .done(result => {
+
+              if (result.length) {
+                  $('#results').html('')
+                  let i = 0
+                  result.forEach(function (item) {
+                    if (i++ > 20) {
+                      return
+                    }
+                    const div = $('#results')
+                    div.html(
+                      div.html() +
+                      `<li>
+                        "${item.file.title}" <a href="tests/${item.file.url}">${item.file.url}</a>
+                        w:${item.weight}</li>`)
+                  })
+              } else {
+                $('#results').html('')
+              }
+
+            });
+
+        })
+      })
+    </script>
+
+    <title>Example</title>
+</head>
+<body>
+
+<h1>Example</h1>
+
+<label for="searchbox" style="display: inline-block; width: 160px;">Search: </label>
+<input id="searchbox" type="text" value="">
+
+<br/>
+
+<label for="query" style="display: inline-block; width: 160px;">Actual query: </label>
+<span id="query"></span>
+
+<ul id="results">
+    <li>No results</li>
+</ul>
+
+</body>
+</html>
