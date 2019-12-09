@@ -7,7 +7,7 @@ $filesJson = <<<JSON
 {"1":{"url":".\/\/data\/other.html","title":"A completely different headline"},"2":{"url":".\/\/data\/simple.html","title":"This is an Example Page"}}
 JSON;
 
-// remove "Control Characters" to avoid json_decode error
+// preg_replace removes "Control Characters" to avoid further json_decode error
 $indexJson = preg_replace('/[[:cntrl:]]/', '', $indexJson);
 $index = json_decode($indexJson);
 

@@ -23,8 +23,16 @@ require_once('data/search-engine-index.php');
  * Search query
  */
 if (isset($_GET['query'])) {
+
     $query = htmlspecialchars($_GET['query']);
-    $searcher = new Searcher($index, $files);
+
+    $hasLimit = (isset($_GET['limit']) && is_numeric(htmlspecialchars($_GET['limit'])));
+    if ($hasLimit) {
+        $searcher = new Searcher($index, $files, (int)htmlspecialchars($_GET['limit']));
+    } else {
+        $searcher = new Searcher($index, $files);
+    }
+
     $searcher->getResults($query);
 }
 

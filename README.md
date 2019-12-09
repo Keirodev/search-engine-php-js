@@ -49,4 +49,4 @@ Usage
 -----
 
 See [example.html](example.html) for a js implementation.  
-See [example-php.html](example-php.html) for a php implementation.
+See [example-php.html](example-php.html) for a php implementation. Notice that the `phpsearch.php` file act as an endpoint. Feel free to integrate its logic in your own framework. 

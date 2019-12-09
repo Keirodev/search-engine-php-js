@@ -10,16 +10,19 @@ class Searcher
     private $words;
     private $index;
     private $files;
+    private $resultLimit;
 
     /**
      * Searcher constructor.
      * @param object $index
      * @param object $files
+     * @param int $resultLimit
      */
-    public function __construct($index, $files)
+    public function __construct($index, $files, $resultLimit = 20)
     {
         $this->index = (array)$index;
         $this->files = $files;
+        $this->resultLimit = $resultLimit;
     }
 
     /**
@@ -113,8 +116,8 @@ class Searcher
             return ($aWeight === $bWeight) ? 0 : ($aWeight < $bWeight) ? 1 : -1;
         });
 
-        // return only the 20 best results
-        return array_slice($result, 0, 20);
+        // return only the 'resultLimit' best results
+        return array_slice($result, 0, $this->resultLimit);
     }
 
     public function getResults($query) {

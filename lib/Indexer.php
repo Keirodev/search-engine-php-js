@@ -112,8 +112,6 @@ class Indexer
 
     public function exportPhp()
     {
-        $index = json_encode($this->index);
-        $files = json_encode($this->files);
         $output = sprintf('<?php
 $indexJson = <<<JSON
 %s
@@ -123,12 +121,15 @@ $filesJson = <<<JSON
 %s
 JSON;
 
-// remove "Control Characters" to avoid json_decode error
+// preg_replace removes "Control Characters" to avoid further json_decode error
 $indexJson = preg_replace(\'/[[:cntrl:]]/\', \'\', $indexJson);
 $index = json_decode($indexJson);
 
 $filesJson = preg_replace(\'/[[:cntrl:]]/\', \'\', $filesJson);
-$files = json_decode($filesJson);',$index, $files);
+$files = json_decode($filesJson);'
+            , json_encode($this->index)
+            , json_encode($this->files)
+        );
         return $output;
     }
 
