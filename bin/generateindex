@@ -2,6 +2,7 @@
 <?php
 
 use cebe\jssearch\Indexer;
+use cebe\jssearch\SQLiteHelper;
 
 // Send all errors to stderr
 ini_set('display_errors', 'stderr');
@@ -35,6 +36,8 @@ $options->argvLanguageIndex = null;
 $options->output = null;
 $options->argvOutputIndex = null;
 
+$options->db = false;
+
 // check arguments
 $src = [];
 foreach ($argv as $key => $argument) {
@@ -61,6 +64,10 @@ foreach ($argv as $key => $argument) {
                 $options->argvOutputIndex = $key + 1;
                 $options->output = $argv[$options->argvOutputIndex];
                 break;
+            case '-db':
+            case '--db':
+                $options->db = true;
+                break;
             default:
                 error("Unknown argument " . $argument[0], "usage");
         }
@@ -86,20 +93,27 @@ foreach ($src as $dir) {
     }
 }
 
+// Export the file or insert in the database
 switch ($options->language) {
     case 'php':
-        $export = $indexer->exportPhp();
         $options->output = ($options->output !== null) ? $options->output : $outputDefaultPhpFilepath;
+        if ($options->db) {
+            $db = new SQLiteHelper();
+            $db->insert($indexer);
+        } else {
+            $export = $indexer->exportPhp();
+            file_put_contents($options->output, $export);
+        }
         break;
 
     case 'js';
         $options->output = ($options->output !== null) ? $options->output : $outputDefaultJsFilepath;
         $export = $indexer->exportJs();
+        file_put_contents($options->output, $export);
         break;
 }
 
-// Export the file or insert in the database
-file_put_contents($options->output, $export);
+
 
 
 // functions
@@ -115,9 +129,10 @@ function usage()
 Usage:
     $cmd [src-directory]
 
-    --help -h    shows this usage information.
-    --output -o  sets the output file (Default: jssearch.index.js or search-engine-index.php).
-    --language -l sets the output language (php or js)
+    --help -h     shows this usage information.
+    --output -o   sets the output file (Default: jssearch.index.js or search-engine-index.php).
+    --language -l sets the output language (PHP or JS)
+    --db -db      export index to Sqlite (for PHP only), no argument needed to this option
     
     creates the output file in the specified directory.
 

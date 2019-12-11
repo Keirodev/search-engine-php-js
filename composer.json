@@ -15,7 +15,8 @@
   "require": {
     "php": ">=5.6.0",
     "ext-mbstring": "*",
-    "ext-json": "*"
+    "ext-json": "*",
+    "ext-pdo": "*"
   },
   "autoload": {
     "psr-4": {
