@@ -22,42 +22,55 @@ if (!class_exists('cebe\jssearch\Indexer')) {
 	error('Autoloading does not seem to work. Looks like you should run `composer install` first.');
 }
 
-$output = new stdClass;
-$output->jsfilepath = 'jssearch.index.js';
-$output->phpfilepath = 'search-engine-index.php';
-$output->argvIndex = NULL;
+$outputDefaultJsFilepath = 'jssearch.index.js';
+$outputDefaultPhpFilepath = 'search-engine-index.php';
+
+$isOutputDefined = false;
+$islanguageDefined = false;
+
+$options = new stdClass;
+$options->language = null;
+$options->argvLanguageIndex = null;
+
+$options->output = null;
+$options->argvOutputIndex = null;
 
 // check arguments
 $src = [];
-foreach($argv as $k => $arg) {
-	if ($k == 0 || $k === $output->argvIndex) {
+foreach($argv as $key => $argument) {
+    // skip argument value ever set
+	if ($key === 0 || $key === $options->argvOutputIndex || $key === $options->argvLanguageIndex) {
 		continue;
 	}
-	if ($arg[0] == '-') {
-		$arg = explode('=', $arg);
-		switch($arg[0]) {
-			// TODO allow baseUrl to be set via arg
+	if ($argument[0] == '-') {
+		$argument = explode('=', $argument);
+		switch($argument[0]) {
 			case '-h':
 			case '--help':
 				echo "php-js-search index builder\n";
 				echo "----------------------\n\n";
 				usage();
 				break;
+            case '-l':
+            case '--language':
+                $options->argvLanguageIndex = $key + 1;
+                $options->language = $argv[$options->argvLanguageIndex];
+                break;
             case '-o':
             case '--output':
-                $output->argvIndex = $k + 1;
-                $output->filepath = $argv[$output->argvIndex];
+                $options->argvOutputIndex = $key + 1;
+                $options->output = $argv[$options->argvOutputIndex];
                 break;
 			default:
-				error("Unknown argument " . $arg[0], "usage");
+				error("Unknown argument " . $argument[0], "usage");
 		}
 	} else {
-		$src[] = $arg;
+		$src[] = $argument;
 	}
 }
 
-if (empty($src)) {
-	error("You have to give an input directory.", "usage");
+if (empty($src) || $options->language === null || !in_array($options->language, ['php', 'js'])) {
+	error("You have to give an input directory and a language.", "usage");
 }
 
 $indexer = new Indexer();
@@ -73,13 +86,21 @@ foreach($src as $dir) {
 	}
 }
 
-// php handler
-$php = $indexer->exportPhp();
-file_put_contents($output->phpfilepath, $php);
+switch ($options->language) {
+    case 'php':
+        $export = $indexer->exportPhp();
+        $options->output = ($options->output !== null) ? $options->output : $outputDefaultPhpFilepath;
+        break;
 
-// js handler
-//$js = $indexer->exportJs();
-//file_put_contents($output->jsfilepath, $php);
+        case 'js';
+        $options->output = ($options->output !== null) ? $options->output : $outputDefaultJsFilepath;
+        $export = $indexer->exportJs();
+        break;
+}
+
+// Export the file
+file_put_contents($options->output, $export);
+
 
 // functions
 
@@ -93,10 +114,11 @@ function usage() {
 Usage:
     $cmd [src-directory]
 
-    --help    shows this usage information.
-    --output  sets the output file (Default: jssearch.index.js or search-engine-index.php).
-
-    creates a jssearch.index.js file in the specified directory.
+    --help -h    shows this usage information.
+    --output -o  sets the output file (Default: jssearch.index.js or search-engine-index.php).
+    --language -l sets the output language (php or js)
+    
+    creates the output file in the specified directory.
 
 EOF;
 	exit(1);
