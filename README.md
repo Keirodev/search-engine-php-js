@@ -43,10 +43,16 @@ This will generate a `jssearch.index.js` file that you have to include in the HT
 
 #### php
 This will generate a `search-engine-index.php` in data folder.
+Example to generate php sqlite index : 
+```bash
+vendor/bin/generateindex tests/data/ -l php -db
+```  
 
 
 Usage
 -----
 
 See [example.html](example.html) for a js implementation.  
-See [example-php.html](example-php.html) for a php implementation. Notice that the `phpsearch.php` file act as an endpoint. Feel free to integrate its logic in your own framework. 
+See [example-php.html](example-php.html) for a php implementation. Notice that the `phpsearch.php` file act as an endpoint. Feel free to integrate its logic in your own framework.
+
+ 

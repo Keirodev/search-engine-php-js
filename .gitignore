@@ -2,3 +2,4 @@ jssearch.index.js
 
 vendor
 .idea
+lib/*.sqlite

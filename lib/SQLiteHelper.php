@@ -5,12 +5,18 @@ namespace cebe\jssearch;
 use Exception;
 use PDO;
 
+/**
+ * Class SQLiteHelper
+ * @package cebe\jssearch
+ * @doc https://www.sqlitetutorial.net/
+ */
 class SQLiteHelper
 {
     private $db;
 
     public function __construct()
     {
+        // todo : choose output directory for the database
         // check if database exists, if not we create it
         try {
             $this->db = new PDO('sqlite:' . dirname(__FILE__) . '/engine.sqlite');
@@ -23,39 +29,63 @@ class SQLiteHelper
     }
 
     /**
-     * @param Indexer $indexer
+     * @param Indexer $indexer (index, files)
      */
     public function insert(Indexer $indexer)
     {
-//        var_dump($indexer->index);
-        var_dump($indexer->files);
-        exit();
-
-        // TODO check fields
-        // create tables
-        $this->db->query("CREATE TABLE IF NOT EXISTS index ( 
+        // create tables if they don't exist
+        $this->db->query("CREATE TABLE IF NOT EXISTS `index` ( 
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-	        word VARCHAR(MAX),
-	        f int,
-	        w float
+	        word NOT NULL TEXT,
+	        f INT,
+	        w FLOAT
 	        );"
         );
+        $this->db->query("CREATE INDEX index_word ON `index`(word);");
 
-        $this->db->query("CREATE TABLE IF NOT EXISTS files ( 
+        $this->db->query("CREATE TABLE IF NOT EXISTS `files` ( 
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-	        url VARCHAR(MAX),
-	        title VARCHAR(MAX)
+	        url TEXT NOT NULL UNIQUE,
+	        title TEXT
 	        );"
         );
 
 
+        // add data to database
+        $nbErrors['files'] = 0;
+        foreach ($indexer->files as $file) {
 
-        $stmt = $pdo->prepare("INSERT INTO posts (titre, created) VALUES (:titre, :created)");
-        $result = $stmt->execute(array(
-            'titre'			=> "Lorem ipsum",
-            'created'		=> date("Y-m-d H:i:s")
-        ));
+            $request = $this->db->prepare("INSERT INTO `files` (url, title) VALUES (:url, :title)");
+            $result = $request->execute([
+                'url' => $file['url'],
+                'title' => $file['title']
+            ]);
 
+            if (!$result) {
+                ++$nbErrors['files'];
+            }
+        }
 
+        $nbErrors['index'] = 0;
+        foreach ($indexer->index as $word => $details) {
+
+            // a word can be found in various files, so it cantains several $details
+            foreach ($details as $detail) {
+                $request = $this->db->prepare("INSERT INTO `index` (word, f, w) VALUES (:word, :f, :w)");
+                $result = $request->execute([
+                    'word' => $word,
+                    'f' => $detail['f'],
+                    'w' => $detail['w']
+                ]);
+
+                if (!$result) {
+                    ++$nbErrors['index'];
+                }
+            }
+        }
+
+        if ($nbErrors['index'] > 0 || $nbErrors['files']) {
+            var_dump($nbErrors);
+        }
     }
 }
