@@ -88,4 +88,41 @@ class SQLiteHelper
             var_dump($nbErrors);
         }
     }
+
+    /**
+     * @param array $words
+     * @return array [url, title] array
+     */
+    public function searchWords($words)
+    {
+        $request = $this->db->prepare("
+            select
+               substr(url, 3) as url
+             , title
+            from \"index\" i
+            join files f on i.f = f.id
+            where word in (:words)
+            order by w desc"
+        );
+
+        $request->execute(['words' => explode(',', $words)]);
+        return $request->fetchAll();
+    }
+
+    /**
+     * @param $word
+     * @return bool
+     */
+    public function searchExactWord($word) {
+        $request = $this->db->prepare("
+            select 
+                case when EXISTS (select word from `index` where word = :word)
+                    then CAST(1 AS BIT)
+                    else CAST(0 AS BIT) 
+                END AS isFound"
+        );
+
+        $request->execute(['word' => $word]);
+        return (bool)$request->fetch(PDO::FETCH_OBJ)->isFound;
+    }
 }

@@ -113,9 +113,6 @@ switch ($options->language) {
         break;
 }
 
-
-
-
 // functions
 
 /**

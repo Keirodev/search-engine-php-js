@@ -1,6 +1,8 @@
 <?php
 
 use cebe\jssearch\Searcher;
+use cebe\jssearch\SearcherDatabase;
+use cebe\jssearch\SearcherFile;
 
 $composerAutoload = [
     __DIR__ . '/vendor/autoload.php', // standalone with "composer install" run
@@ -15,22 +17,21 @@ foreach ($composerAutoload as $autoload) {
 
 
 /**
- * get $index & $files
+ *
+ *  WITH SQLLITE DB
+ *
  */
-require_once('data/search-engine-index.php');
 
-/**
- * Search query
- */
+// Search query
 if (isset($_GET['query'])) {
 
     $query = htmlspecialchars($_GET['query']);
 
     $hasLimit = (isset($_GET['limit']) && is_numeric(htmlspecialchars($_GET['limit'])));
     if ($hasLimit) {
-        $searcher = new Searcher($index, $files, (int)htmlspecialchars($_GET['limit']));
+        $searcher = new SearcherDatabase((int)htmlspecialchars($_GET['limit']));
     } else {
-        $searcher = new Searcher($index, $files);
+        $searcher = new SearcherDatabase();
     }
 
     $searcher->getResults($query);
@@ -38,3 +39,29 @@ if (isset($_GET['query'])) {
 
 
 
+/**
+ *
+ *  WITH LOCAL FILE
+ *
+ */
+
+/*
+// get $index & $files
+require_once('data/search-engine-index.php');
+
+// Search query
+if (isset($_GET['query'])) {
+
+    $query = htmlspecialchars($_GET['query']);
+
+    $hasLimit = (isset($_GET['limit']) && is_numeric(htmlspecialchars($_GET['limit'])));
+    if ($hasLimit) {
+        $searcher = new SearcherFile($index, $files, (int)htmlspecialchars($_GET['limit']));
+    } else {
+        $searcher = new SearcherFile($index, $files);
+    }
+
+    $searcher->getResults($query);
+}
+
+*/
