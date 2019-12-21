@@ -20,7 +20,7 @@ class SQLiteHelper
         // check if database exists, if not we create it
         try {
             $this->db = new PDO('sqlite:' . dirname(__FILE__) . '/engine.sqlite');
-            $this->db->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
+            $this->db->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_OBJ);
             $this->db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION); // ERRMODE_WARNING | ERRMODE_EXCEPTION | ERRMODE_SILENT
         } catch (Exception $e) {
             echo "Cannot access to SQLite DB : " . $e->getMessage();
@@ -90,22 +90,35 @@ class SQLiteHelper
     }
 
     /**
-     * @param array $words
-     * @return array [url, title] array
+     * @param string $words
+     * @return array [url, title, w, f] array
      */
     public function searchWords($words)
     {
-        $request = $this->db->prepare("
+        $request = $this->db->query("
             select
                substr(url, 3) as url
              , title
-            from \"index\" i
-            join files f on i.f = f.id
-            where word in (:words)
+             , w
+             , f.id as f
+            from `index` i
+                join files f on i.f = f.id
+            where word in ($words)
             order by w desc"
         );
 
-        $request->execute(['words' => explode(',', $words)]);
+        return $request->fetchAll();
+    }
+
+    /**
+     * @param $wordToComplete
+     * @return array [$word] array
+     */
+    public function searchWordsStartingBy($wordToComplete)
+    {
+        // NOTE :  || in sql is a concatenation operator
+        $request = $this->db->prepare("select distinct word from `index` where word like :word || '%'");
+        $request->execute(['word' => $wordToComplete]);
         return $request->fetchAll();
     }
 
@@ -113,7 +126,8 @@ class SQLiteHelper
      * @param $word
      * @return bool
      */
-    public function searchExactWord($word) {
+    public function searchExactWord($word)
+    {
         $request = $this->db->prepare("
             select 
                 case when EXISTS (select word from `index` where word = :word)
@@ -123,6 +137,6 @@ class SQLiteHelper
         );
 
         $request->execute(['word' => $word]);
-        return (bool)$request->fetch(PDO::FETCH_OBJ)->isFound;
+        return (bool)$request->fetch()->isFound;
     }
 }

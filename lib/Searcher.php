@@ -34,14 +34,24 @@ abstract class Searcher
             return false;
         }
 
-        return $this->searchIn();
-    }
+        // complete words
+        $this->words = $this->completeWords();
 
-    /**
-     * Must implement the search logic in files or database
-     * @return array
-     */
-    abstract protected function searchIn();
+        //searchForWords
+        $result = $this->searchForWords();
+
+        // sort by weight
+        usort($result, function ($a, $b) {
+
+            $aWeight = $a['weight'];
+            $bWeight = $b['weight'];
+
+            return ($aWeight === $bWeight) ? 0 : ($aWeight < $bWeight) ? 1 : -1;
+        });
+
+        // return only the 'resultLimit' best results
+        return array_slice($result, 0, $this->resultLimit);
+    }
 
     abstract protected function completeWords();
 

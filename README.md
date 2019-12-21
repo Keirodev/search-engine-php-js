@@ -45,7 +45,7 @@ This will generate a `jssearch.index.js` file that you have to include in the HT
 This will generate a `search-engine-index.php` in data folder.
 Example to generate php sqlite index : 
 ```bash
-vendor/bin/generateindex tests/data/ -l php -db
+vendor/bin/generateindex tests/ -l php -db
 ```  
 
 

@@ -1,6 +1,5 @@
 <?php
 
-use cebe\jssearch\Searcher;
 use cebe\jssearch\SearcherDatabase;
 use cebe\jssearch\SearcherFile;
 
@@ -22,6 +21,7 @@ foreach ($composerAutoload as $autoload) {
  *
  */
 
+
 // Search query
 if (isset($_GET['query'])) {
 
@@ -36,6 +36,7 @@ if (isset($_GET['query'])) {
 
     $searcher->getResults($query);
 }
+
 
 
 
@@ -63,5 +64,5 @@ if (isset($_GET['query'])) {
 
     $searcher->getResults($query);
 }
-
 */
+

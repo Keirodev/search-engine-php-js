@@ -22,30 +22,6 @@ class SearcherFile extends Searcher
     }
 
     /**
-     * @return array|bool
-     */
-    protected function searchIn()
-    {
-        // complete words
-        $this->words = $this->completeWords();
-
-        //searchForWords
-        $result = $this->searchForWords();
-
-        // sort by weight
-        usort($result, function ($a, $b) {
-
-            $aWeight = $a['weight'];
-            $bWeight = $b['weight'];
-
-            return ($aWeight === $bWeight) ? 0 : ($aWeight < $bWeight) ? 1 : -1;
-        });
-
-        // return only the 'resultLimit' best results
-        return array_slice($result, 0, $this->resultLimit);
-    }
-
-    /**
      * Complete a word to known index (ex: lop => lopsem)
      * @return array
      */

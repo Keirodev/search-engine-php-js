@@ -19,11 +19,7 @@
 
                 if (result.length) {
                   $('#results').html('')
-                  let i = 0
                   result.forEach(function (item) {
-                    if (i++ > 20) {
-                      return
-                    }
                     const div = $('#results')
                     div.html(
                       div.html() +
