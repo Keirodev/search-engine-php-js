@@ -34,6 +34,7 @@ class SQLiteHelper
      */
     public function insert(Indexer $indexer)
     {
+        $this->db->beginTransaction();
         // create tables if they don't exist
         $this->db->query("CREATE TABLE IF NOT EXISTS `index` ( 
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -43,52 +44,113 @@ class SQLiteHelper
 	        );"
         );
         $this->db->query("CREATE INDEX IF NOT EXISTS index_word ON `index`(word);");
-
         $this->db->query("CREATE TABLE IF NOT EXISTS `files` ( 
             id INTEGER PRIMARY KEY AUTOINCREMENT,
 	        url TEXT NOT NULL UNIQUE,
 	        title TEXT
 	        );"
         );
-
+        $this->db->commit();
 
         // add data to database
+        // FILES
         $nbErrors['files'] = 0;
+        $dataToInsert = [];
         $nbInsert = 0;
+
         foreach ($indexer->files as $file) {
+            array_push($dataToInsert,
+                [
+                    $this->db->quote($file['url']),
+                    $this->db->quote($file['title'])
+                ]);
             ++$nbInsert;
-            $request = $this->db->prepare("INSERT INTO `files` (url, title) VALUES (:url, :title)");
+        }
+
+        $dataToInsert = array_map(function ($entryToInsert) {
+            return '(' . implode(',', $entryToInsert) . ')';
+        },$dataToInsert);
+
+        $sql = 'INSERT INTO `files` (url, title) VALUES ' . implode(',', $dataToInsert);
+        $this->db->beginTransaction();
+
+        try {
+            $this->db->query($sql);
+            $this->db->commit();
+        } catch (PDOException $e) {
+            $this->db->rollBack();
+            ++$nbErrors['files'];
+        }
+        echo "Processing - Inserting a batch of $nbInsert enties in files\n";
+
+
+        // Test to split in batch of max entries (ex : INSERT per batch of 10.000 entries)
+        /*for ($i = 1; $i <= $nbFiles; $i++) {
+            $nbFilesLoop = 0;
+            // prepare a batch of $maxInsert values to insert
+            $dataToInsert = [];
+            while ($i <= $nbFiles && $nbFilesLoop < $maxInsert) {
+                array_push($dataToInsert,
+                    [
+                        "'" . $indexer->files[$i]['url'] . "'"
+                        , "'" . $indexer->files[$i]['title'] . "'"
+                    ]);
+                $i++;
+                $nbFilesLoop++;
+            }
+            $i--; // because the previous $i++ will double the for ($i++ on next loop)
+
+            $dataToInsert = array_map(function ($entryToInsert) {
+                return '(' . implode(',', $entryToInsert) . ')';
+            },$dataToInsert);
+
+            $sql = 'INSERT INTO `files` (url, title) VALUES ' . implode(',', $dataToInsert);
+
+            $this->db->beginTransaction();
             try {
-            $request->execute([
-                'url' => $file['url'],
-                'title' => $file['title']
-            ]);
+                $this->db->query($sql);
+                $this->db->commit();
             } catch (PDOException $e) {
+                $this->db->rollBack();
                 ++$nbErrors['files'];
             }
-        }
-        echo "Processing files insert n°$nbInsert\n";
+            echo "Processing - Inserting a batch of $nbFilesLoop enties in files\n";
+        }*/
 
+        // INDEX prepare batch of $maxInsert values to insert
         $nbErrors['index'] = 0;
-        $nbInsert = 0;
+        $dataToInsert = [];
+        $nbIndexLoop = 0;
 
         foreach ($indexer->index as $word => $details) {
-            ++$nbInsert;
-            // a word can be found in various files, so it cantains several $details
+            // a word can be found in various files, so it contains several $details
             foreach ($details as $detail) {
-                $request = $this->db->prepare("INSERT INTO `index` (word, f, w) VALUES (:word, :f, :w)");
-                try {
-                    $request->execute([
-                        'word' => $word,
-                        'f' => $detail['f'],
-                        'w' => $detail['w']
+                array_push($dataToInsert,
+                    [
+                        $this->db->quote($word)
+                        , $detail['f']
+                        , $detail['w']
                     ]);
-                } catch (PDOException $e) {
-                    ++$nbErrors['index'];
-                }
+                $nbIndexLoop++;
             }
         }
-        echo "Processing index insert n°$nbInsert\n";
+
+        // from ['foo', 'bar'] to ["'foo', 'bar'"]
+        $dataToInsert = array_map(function ($entryToInsert) {
+            return '(' . implode(',', $entryToInsert) . ')';
+        },$dataToInsert);
+
+        $sql = 'INSERT INTO `index` (word, f, w) VALUES ' . implode(',', $dataToInsert);
+
+        $this->db->beginTransaction();
+        try {
+            $this->db->query($sql);
+            $this->db->commit();
+        } catch (PDOException $e) {
+            $this->db->rollBack();
+            ++$nbErrors['index'];
+        }
+        echo "Processing - Inserting a batch of $nbIndexLoop entries in index\n";
 
         if ($nbErrors['index'] > 0 || $nbErrors['files']) {
             var_dump($nbErrors);
