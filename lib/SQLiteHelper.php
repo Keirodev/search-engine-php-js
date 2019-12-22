@@ -4,6 +4,7 @@ namespace cebe\jssearch;
 
 use Exception;
 use PDO;
+use PDOException;
 
 /**
  * Class SQLiteHelper
@@ -36,16 +37,16 @@ class SQLiteHelper
         // create tables if they don't exist
         $this->db->query("CREATE TABLE IF NOT EXISTS `index` ( 
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-	        word NOT NULL TEXT,
+	        word TEXT NOT NULL,
 	        f INT,
 	        w FLOAT
 	        );"
         );
-        $this->db->query("CREATE INDEX index_word ON `index`(word);");
+        $this->db->query("CREATE INDEX IF NOT EXISTS index_word ON `index`(word);");
 
         $this->db->query("CREATE TABLE IF NOT EXISTS `files` ( 
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-	        url TEXT NOT NULL UNIQUE,
+	        url TEXT NOT NULL UNIQUE,
 	        title TEXT
 	        );"
         );
@@ -53,36 +54,41 @@ class SQLiteHelper
 
         // add data to database
         $nbErrors['files'] = 0;
+        $nbInsert = 0;
         foreach ($indexer->files as $file) {
-
+            ++$nbInsert;
             $request = $this->db->prepare("INSERT INTO `files` (url, title) VALUES (:url, :title)");
-            $result = $request->execute([
+            try {
+            $request->execute([
                 'url' => $file['url'],
                 'title' => $file['title']
             ]);
-
-            if (!$result) {
+            } catch (PDOException $e) {
                 ++$nbErrors['files'];
             }
         }
+        echo "Processing files insert n°$nbInsert\n";
 
         $nbErrors['index'] = 0;
-        foreach ($indexer->index as $word => $details) {
+        $nbInsert = 0;
 
+        foreach ($indexer->index as $word => $details) {
+            ++$nbInsert;
             // a word can be found in various files, so it cantains several $details
             foreach ($details as $detail) {
                 $request = $this->db->prepare("INSERT INTO `index` (word, f, w) VALUES (:word, :f, :w)");
-                $result = $request->execute([
-                    'word' => $word,
-                    'f' => $detail['f'],
-                    'w' => $detail['w']
-                ]);
-
-                if (!$result) {
+                try {
+                    $request->execute([
+                        'word' => $word,
+                        'f' => $detail['f'],
+                        'w' => $detail['w']
+                    ]);
+                } catch (PDOException $e) {
                     ++$nbErrors['index'];
                 }
             }
         }
+        echo "Processing index insert n°$nbInsert\n";
 
         if ($nbErrors['index'] > 0 || $nbErrors['files']) {
             var_dump($nbErrors);
